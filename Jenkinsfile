@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages {
-        stage('Secret scen') {
+        stage('Secret scan') {
             steps {
                 sh 'trivy fs --scanners secret --skip-dirs .git --exit-code 1 .'
             }
@@ -14,8 +14,13 @@ pipeline {
 
         stage('Build image') {
            steps {
-               sh 'docker build -t $IMAGE:%BUILD_NUMBER .'
+               sh 'docker build -t $IMAGE:$BUILD_NUMBER .'
            }
+        }
+        stage('Image gate') {
+            steps {
+                sh 'trivy image --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --scip-dirs /usr/local/lib/node_modules --exit-code 1 $IMAGE:$BUILD_NUMBER'
+            }
         }
         stage('OS report') {
             steps {
@@ -23,3 +28,9 @@ pipeline {
             }
         }
    }
+   post {
+       always {
+           sh 'docker rmi $IMAGE:$BUILD_NUMBER || true'
+       }
+   }
+}
