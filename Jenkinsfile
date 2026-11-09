@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Image gate') {
             steps {
-                sh 'trivy image --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --scip-dirs /usr/local/lib/node_modules --exit-code 1 $IMAGE:$BUILD_NUMBER'
+                sh 'trivy image --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --skip-dirs /usr/local/lib/node_modules --exit-code 1 $IMAGE:$BUILD_NUMBER'
             }
         }
         stage('OS report') {
